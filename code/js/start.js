@@ -1,69 +1,35 @@
-var tt = document.createElement('div'),
-leftOffset = -(~~$('html').css('padding-left')
-		   .replace('px', '') + 
-		   ~~$('body').css('margin-left')
-		   .replace('px', '')),
-topOffset = -32;
-tt.className = 'ex-tooltip';
-document.body.appendChild(tt);
+var data = [1,3,5,7,25,29,50]
 
-var data = {
-  "xScale": "time",
-  "yScale": "linear",
-  "main": [
-    {
-      "className": ".pizza",
-      "data": [
-        {
-          "x": "2012-11-05",
-          "y": 6
-        },
-        {
-          "x": "2012-11-06",
-          "y": 6
-        },
-        {
-          "x": "2012-11-07",
-          "y": 8
-        },
-        {
-          "x": "2012-11-08",
-          "y": 3
-        },
-        {
-          "x": "2012-11-09",
-          "y": 4
-        },
-        {
-          "x": "2012-11-10",
-          "y": 9
-        },
-        {
-          "x": "2012-11-11",
-          "y": 6
-        }
-      ]
-    }
-  ]
-};
+var width = 500;
+var height = 500;
+var bar_padding = width/data.length * 1/3;
 
-var opts = {
-  "dataFormatX": function (x) { 
-      return d3.time.format('%Y-%m-%d').parse(x); },
-  "tickFormatX": function (x) { 
-      return d3.time.format('%A')(x); },
-  "mouseover": function (d, i) {
-      var pos = $(this).offset();
+var our_svg = d3.select("#main_container")
+				.append("svg")
+				.attr("width",width)
+				.attr("height",height);
+console.log(d3.extend(data));
 
-      $(tt).text(d3.time.format('%A')(d.x) + ': ' + d.y)
-	  .css({top: topOffset + pos.top, left: pos.left + leftOffset})
-	  .show();
-  },
-  "mouseout": function (x) {
-    $(tt).hide();
-  }
-};
+var color_scale = d3.scale.linear()
+		.domain([0,100])
+		// .domain(d3.extend(data))
+		.range(['orange', 'yellow']);
 
-var myChart = new xChart('line-dotted', data, '#myChart', opts);
-
-
+var rects = our_svg.selectAll('rect')
+			.data(data)
+			.enter().append("rect")
+			.attr("x", function(d,i){
+				return i*(width/data.length);
+			})
+			.attr('y', function(d){
+				return 100 - d
+			})
+			.attr('width', width / data.length - bar_padding)
+			.attr("height", function(d){return d})
+			.attr("fill", function(d){return color_scale(d)});
+			
+var texts = our_svg.text(function(d){return d})
+			.attr('x', function(d,i){return i * width/data.length;})
+			.attr('y', function(d){
+				return 0;
+			});
